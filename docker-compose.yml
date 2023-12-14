@@ -1,0 +1,102 @@
+version: '3.3'
+
+services:
+  # ======================================
+  # -- PROXY
+  # The proxy is to simulate the EXPLORE's loadbalancing to a subpath
+  # ======================================
+  proxy:
+    image: 'traefik:2.4'
+    container_name: proxy_gtomo
+    ports:
+      - 8080:8080
+      - 8015:80
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+    command:
+      - '--api.insecure=true'
+      - '--entryPoints.web.address=:80'
+      - '--providers.docker=true'
+      - '--serverstransport.insecureskipverify=true'
+      - '--api=true'
+      - '--api.debug=true'
+      - '--log.level=INFO'
+
+  # ======================================
+  # -- SDA
+  # ======================================
+  sda:
+    build:
+      context: ./sda/
+      #dockerfile: ./_local/Dockerfile
+      dockerfile: ./_prod/Dockerfile
+    container_name: sda_gtomo
+    env_file:
+      - .env
+    environment:
+      - PATH_PREFIX=/sda/
+      - LOCAL=true
+      # - VISUALIZER_HOST=0.0.0.0
+      # - VISUALIZER_PORT=20000
+      #- SDA_ENV=GTOMO
+      #- REQUEST_ORIGIN=https://www.explore-platform.eu
+      #- REQUEST_ORIGIN=http://localhost:8015
+    volumes:
+      # - ./sda/:/sda/
+      # - /sda/visualiser/app/build/
+      - ./_data/app_data/:${SERVICE_APP_DATA}
+      - ./_data/input_dir/:${SERVICE_INPUT_DIR}
+      - ./_data/output_dir/:${SERVICE_OUTPUT_DIR}
+      - ./_data/user_app_data/:${SERVICE_USER_APP_DATA}
+      - ./_data/user_data/:${SERVICE_USER_DATA}
+    ports:
+      - 8010:80
+      - 20000:20000 # visualiser node
+      # - : # visualiser python
+      #- 5004:5004 # visualiser bias detection
+      - 5001:5001 # machine learning
+      - 5002:5002 # science
+      #- 5003:5003 #test
+      - 8050:8050 # dash application
+      #- 8529:8529
+    depends_on:
+      - proxy
+#      - arango
+#      - mongo
+    links:
+      - proxy
+      #- arango
+      #- mongo
+    labels:
+        traefik.enable: 'true'
+        
+        traefik.http.routers.sda.entrypoints: 'web'
+        traefik.http.routers.sda.rule: 'HostRegexp(`{host:.+}`) && PathPrefix(`/sda/`)'
+        # If strip path is required
+        traefik.http.routers.sda.middlewares: 'sda-strip-prefix'
+        traefik.http.middlewares.sda-strip-prefix.stripprefix.prefixes: '/sda/'
+
+        traefik.http.services.sda.loadbalancer.server.scheme: 'http'
+        # PORT OF THE VISUALISER
+        traefik.http.services.sda.loadbalancer.server.port: '80'
+
+#  mongo:
+#    image: mongo:latest
+#    container_name: mongo_gtomo
+#    ports:
+#      - 27017:27017
+#    volumes:
+#      - ./_db/mongo_data/:/data/db
+#    labels:
+#      traefik.enable: 'false'
+#  arango:
+#    image: 'arangodb:latest'
+#    container_name: arango_gtomo
+#    environment:
+#      - ARANGO_ROOT_PASSWORD=root
+#    volumes:
+#      - ./_db/arango_data/:/var/lib/arangodb3
+#    ports:
+#      - 8529:8529
+#    labels:
+#      traefik.enable: 'false'

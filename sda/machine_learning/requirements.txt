@@ -1,0 +1,12 @@
+joblib<1.2.0
+Flask
+gunicorn
+scipy
+numpy
+pandas
+hdbscan
+matplotlib
+scikit-learn
+h5py
+seaborn
+shapely

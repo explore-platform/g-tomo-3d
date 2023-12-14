@@ -1,0 +1,30 @@
+FROM ubuntu:20.04 
+
+#create directory
+RUN mkdir -p /usr/src/biasdetection
+WORKDIR /usr/src/biasdetection
+
+# install software
+RUN apt-get update 
+#RUN apt install software-properties-common -y
+#RUN add-apt-repository ppa:deadsnakes/ppa -y 
+RUN apt install python3.8 -y 
+RUN apt install python3-distutils -y 
+RUN apt install python3-apt -y
+RUN apt install curl -y
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py 
+RUN python3.8 get-pip.py 
+RUN apt install git -y
+
+#install bias detection
+RUN mkdir -p /usr/src/biasdetection
+WORKDIR /usr/src/biasdetection
+RUN git config --global http.sslVerify false
+RUN git clone https://gitlab-ci-token:glpat-FU_Nz1DE-sAjhxm1ttqx@gitlab.know-center.tugraz.at/visualizer/bias-detection-fastapi.git biasdetection
+
+WORKDIR ./biasdetection
+RUN pip3.8 install -r requirements.txt --default-timeout=10000
+
+
+#run bias detection
+CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "5004"]

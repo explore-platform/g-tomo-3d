@@ -1,0 +1,14 @@
+[Unit]
+Description=Gunicorn instance to serve machine learning
+After=network.target
+
+[Service]
+User=root
+# Group=www-data
+WorkingDirectory=/sda/
+# Environment="PATH=/home/sammy/myproject/myprojectenv/bin"
+# ExecStart=gunicorn --workers 3 --bind unix:machine_learning.sock -m 007 wsgi:app
+ExecStart=gunicorn --workers 3 --bind unix:machine_learning.sock wsgi:app
+
+[Install]
+WantedBy=multi-user.target

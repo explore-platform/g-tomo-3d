@@ -1,0 +1,35 @@
+FROM ubuntu:20.04 
+
+#create directory
+RUN mkdir -p /usr/src/visualization
+WORKDIR /usr/src/visualization
+
+# install software
+RUN apt-get update 
+RUN apt install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa -y 
+RUN apt install python3.8 -y 
+RUN apt install python3-distutils -y 
+RUN apt install python3-apt -y
+RUN apt install curl -y
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py 
+RUN python3.8 get-pip.py 
+RUN apt-get install nodejs -y 
+RUN apt-get install npm -y
+RUN apt install git -y
+
+#clone Visualizer
+RUN git config --global http.sslVerify false
+RUN git clone -b visualizer_v3_gtomo https://gitlab-ci-token:glpat-r_RJRyskgStudyhrhaUB@gitlab.know-center.tugraz.at/visualizer/visualizer.git visualizer
+WORKDIR ./visualizer
+
+#install dependencies 
+RUN npm install 
+CMD ["babel" "./public/js --out-dir=./public/dist --source-maps inline --copy-files"]
+WORKDIR ./app/wizard
+WORKDIR /usr/src/visualization/visualizer/app/wizard
+RUN pip3.8 install -r requirements.txt --default-timeout=10000
+
+WORKDIR /usr/src/visualization/visualizer
+RUN chmod +x ./startApplications.sh
+CMD ./startApplications.sh

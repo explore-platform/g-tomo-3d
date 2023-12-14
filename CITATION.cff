@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+title: G-Tomo-3D
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Nick
+    family-names: Cox
+    email: nick.cox@acri-st.fr
+    affiliation: ACRI-ST
+    orcid: 'https://orcid.org/'
+  - given-names: Manuela
+    family-names: Rauch
+    email: mrauch@know-center.at
+    affiliation: Know Center
+    orcid: 'https://orcid.org/'
+  - given-names: L.
+    family-names: Schober
+    email: lschober@know-center.at
+    affiliation: Know Center
+    orcid: 'https://orcid.org/'
+identifiers:
+  - type: doi
+    value: 
+repository-code: 'https://github.com/explore-platform/g-tomo-3d'
+url: 'https://explore-platform.eu'
+repository: 'https://ascl.net/'
+repository-artifact: ''
+abstract: |-
+  The G-Tomo-3D scientific data application provides as main service:
+  1) 3d volume rendering of the dust extinction cubes and slicing (2D planes) with annotation interface.
+keywords:
+  - extinction
+  - interstellar medium (ISM)
+  - galactic
+license: Apache-2.0
+version: v2
+date-released: '2023-12-14'

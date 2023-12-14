@@ -1,0 +1,72 @@
+# BUILD VISUALISER
+FROM node:15.14.0 as NODE
+
+WORKDIR /sda/visualiser/app
+
+COPY ./visualiser/app/package*.json ./
+RUN npm install -q
+
+COPY ./visualiser/app .
+RUN npm run build
+
+# ACTUAL IMAGE
+FROM ubuntu:20.04
+
+WORKDIR /sda/
+
+# ==============================================
+# COMMON INSTALLS
+# ==============================================
+RUN apt update
+RUN apt install -y software-properties-common
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get update
+RUN apt update
+RUN apt install -y python3.8 python3.8-venv  python-is-python3 python3-pip nginx curl wget \
+    python3-distutils python3-apt git
+RUN python --version
+RUN python -m pip --version
+
+
+# ==============================================
+# PIP INSTALLS (fast docker build)
+# ==============================================
+
+# MACHINE LEARNING LIBS
+RUN python -m venv /venv/machine_learning_env
+COPY  ./machine_learning/requirements.txt  ./machine_learning/requirements.txt
+RUN /venv/machine_learning_env/bin/pip install -r ./machine_learning/requirements.txt
+
+# SCIENCE LIBS
+RUN python -m venv /venv/science_env
+COPY  ./science/requirements.txt  ./science/requirements.txt
+RUN /venv/science_env/bin/pip install -r ./science/requirements.txt
+
+# ==============================================
+# COPY ALL FILES
+# ==============================================
+COPY . .
+
+# ==============================================
+# NGINX
+# ==============================================
+COPY ./_prod/nginx.conf /etc/nginx/nginx.conf
+COPY ./_prod/default.conf /etc/nginx/conf.d/default.conf
+
+# ==============================================
+# BUILD SCRIPTS
+# ==============================================
+RUN bash machine_learning/build.sh
+RUN bash science/build.sh
+RUN bash visualiser/build.sh
+
+
+# ==============================================
+# COPY FRONTEND (Visualiser)
+# ==============================================
+COPY --from=NODE /sda/visualiser/app/build/ /sda/visualiser/app/build/
+
+# ==============================================
+# ENTRYPOINTS
+# ==============================================
+ENTRYPOINT bash ./_prod/run.sh
