@@ -17,7 +17,7 @@ See the EXPLORE docs.
 
 ## Data
 
-Input data files can be retrieved from Zenodo [ZenodoID](https://zenodo.org/).
+Input data files can be retrieved from Zenodo: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10406497.svg)](https://doi.org/10.5281/zenodo.10406497)
 
 For local deployment these can be added to '_data/app_data/'.
 
